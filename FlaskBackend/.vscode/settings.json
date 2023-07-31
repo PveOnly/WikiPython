@@ -1,0 +1,17 @@
+{
+    "python.linting.enabled": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.linting.pylintEnabled": true,
+    "isort.args": [
+        "--profile", "black"
+    ],
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.formatOnSave": true,
+        "editor.wordBasedSuggestions": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}

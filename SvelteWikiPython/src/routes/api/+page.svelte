@@ -1,5 +1,5 @@
 <script>
-	/** @type {number} */
+	// /** @type {number} */
 	let number;
 
 	async function roll() {
@@ -11,5 +11,5 @@
 <button on:click={roll}>Roll the dice</button>
 
 {#if number !== undefined}
-	<p>You rolled a {number}</p>
+	<p>You rolled a {number.random_url}</p>
 {/if}

@@ -10,6 +10,7 @@
 	<a href="/todolist">todolist</a>
 	<a href="/api">API</a>
 	<a href="/post_todo">POST REQUEST TODO</a>
+	<a href="/flask">FLASK</a>
 	{#if $navigating}
 		navigating to {$navigating.to.url.pathname}
 	{/if}

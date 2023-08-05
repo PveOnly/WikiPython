@@ -2,6 +2,10 @@ import sqlite3
 
 import pandas as pd
 from flask import Flask, jsonify, render_template_string
+import random
+
+#Fix seed
+random.seed(1)
 
 from src.database.simple_database import SimpleSQLiteDB
 
@@ -33,13 +37,27 @@ class SimpleDatabaseView(SimpleSQLiteDB):
             )  # Replace your_table_name with the actual table name in your database
             head_data = cursor.fetchall()
             return head_data, cursor
+        
+    def get_random_url(self, table_name="Reference"):
+        with self:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"SELECT * FROM {table_name}"
+            )  # Replace your_table_name with the actual table name in your database
+            head_data = cursor.fetchall()
+            result=random.choice(head_data)
+            return result
 
 
 @app.route("/")
 def show_head():
-    head_data, _ = db.get_database_head()
+    head_data = db.table_names
     return jsonify(head_data)
 
+@app.route("/pandas/random")
+def get_random_python_url():
+    random_url = db.get_random_url()
+    return jsonify(random_url)
 
 @app.route("/pandas/<string:table_name>/<int:number_row>")
 @app.route("/pandas/<string:table_name>/")
@@ -48,9 +66,14 @@ def show_head_pandas(table_name, number_row=25):
         return f"Table '{table_name}' not found in the database."
     head_data, cursor = db.get_database_head(table_name, number_row)
     columns = [description[0] for description in cursor.description]
-    df = pd.DataFrame(head_data, columns=columns)
-    return render_template_string(df.to_html())
+    #df = pd.DataFrame(head_data, columns=columns)
+    head_data.insert(0,columns)
+    return jsonify(head_data)
 
+@app.route("/test/simple")
+def test_url():
+    head_data = db.table_names
+    return jsonify(head_data)
 
 if __name__ == "__main__":
     db = SimpleDatabaseView("WikiPython.db")

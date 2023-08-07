@@ -79,6 +79,16 @@ class WikiPythonDB(SimpleSQLiteDB):
             ],
             uniques_var=["url", "python_version_id", "category_id"],
         )
+        self.create_table(
+            "ReferenceNoFragment",
+            [
+                "id INTEGER PRIMARY KEY",
+                "url TEXT NOT NULL",
+                "python_version_id INTEGER",
+                "category_id INTEGER",
+            ],
+            uniques_var=["url", "python_version_id", "category_id"],
+        )
 
     def get_id_by_name(self, table_name, column_name, value):
         """Retrieve the ID of a category based on its name."""
@@ -103,13 +113,61 @@ class WikiPythonDB(SimpleSQLiteDB):
             "Reference", (None, reference_url, python_version_id, category_id)
         )
 
+    def fetch_index(self, table_name, column_name, substring):
+        query = f"SELECT * FROM {table_name} WHERE {column_name} LIKE '%{substring}%'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        return result
+
+    def delete_index(self, table_name, column_name, substring):
+        query = f"DELETE FROM {table_name} WHERE {column_name} LIKE '%{substring}%'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        return result
+
+    def fetch_all_data(self, table_name):
+        query = f"SELECT * FROM {table_name}"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        return result
+
+
+def get_unique_row(db: WikiPythonDB):
+    res = db.fetch_all_data("Reference")
+    unique_row = set()
+    for r in res:
+        id, url, python_version, category_id = r
+        path_segment = url.split("/")[-1]
+        # print(path_segment)
+
+        if "#" not in path_segment:
+            unique_row.add((url, python_version, category_id))
+        else:
+            url_unique = url.split("#")[0]
+            unique_row.add((url_unique, python_version, category_id))
+    return unique_row
+
 
 def db_python_doc():
     db = WikiPythonDB("WikiPython.db")
     with db:
-        print(db.retrieve_data("Category"))
+        db.init_db()
+        # res = db.delete_index("Reference", "url", "index")
+
+        res = get_unique_row(db)
+        for row in res:
+            print(row)
+            url, python_version, category_id = row
+            db.insert_data(
+                "ReferenceNoFragment", (None, url, python_version, category_id)
+            )
+        # for r in res:
+        #    print(r)
+        # print(db.retrieve_data("Category"))
         # db.insert_data_python_wiki_db(version, category_name, reference_url)
 
+
+# def
 
 # Example usage:
 if __name__ == "__main__":
